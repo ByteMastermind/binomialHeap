@@ -1,6 +1,4 @@
 #include <stdexcept>
-#include <iostream>
-#include <string>
 
 size_t GlobalTime = 0;
 
