@@ -385,6 +385,11 @@ class CBinomialHeap {
 
 
         }
+        
+        void deleteMin(void) {
+            deleteBinHeapItem(min);
+            findNewMin();
+        }
 
     private:
         CLinkedList<binHeapItem<T>> binomialTrees;
@@ -540,5 +545,22 @@ int main(void) {
 
 
     a.printAll();
+
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+    std::cout << a.findMin()->data << std::endl;
+    a.deleteMin();
+
     return 0;
 }
