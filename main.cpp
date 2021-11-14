@@ -314,43 +314,9 @@ class CBinomialHeap {
         void merge(CBinomialHeap & heap) {    // TODO remake it to next()
             print("Inside merge()");
             
-            // Finding minimum
-            if (findMin()->data > heap.findMin()->data || (findMin()->data == heap.findMin()->data && findMin()->timeStamp < heap.findMin()->timeStamp))
-                min = heap.findMin();
-            
-
             CLinkedList<binHeapItem<T>> newTrees;
-            newTrees.rename("newTrees");    // todo Delete
-            size_t i = 0, j = 0;
- 
-            while (i < rootCount() && j < heap.rootCount()) {
-                if (at(i)->degree < heap.at(j)->degree)
-                    newTrees.insertEnd(at(i++), true);
-                else
-                    newTrees.insertEnd(heap.at(j++), true);
-            }
- 
-            while (i < rootCount())
-                newTrees.insertEnd(at(i++), true);
- 
-            while (j < heap.rootCount())
-                newTrees.insertEnd(heap.at(j++), true);
 
-            print("Deleting all from binomial trees with false");
-            binomialTrees.deleteAll(false);
-            treeCount = binomialTrees.size();   //TODO maybe delete
-            print("Deleting all from b heap with false");
-            heap.deleteAll(false);
-            
-            // Transfering all to the original list
-            for (size_t i = 0; i < newTrees.size(); i++)
-                binomialTrees.insertEnd(newTrees.next(), true);
-
-            connectEqualDegrees();
-            treeCount = binomialTrees.size();
-
-            print("Deleting all from tmp linked list with false");
-            newTrees.deleteAll(false);
+            mergeTwoLists(binomialTrees, heap.binomialTrees, newTrees);
         }
 
         binHeapItem<T> * at(const size_t index) const {
@@ -376,12 +342,14 @@ class CBinomialHeap {
             treeCount = 0;
         }
 
-        binHeapItem<T> * findMin(void) const {
-            return min;
+        binHeapItem<T> * findMin(void) {
+            return findNewMin();
         }
 
         void deleteBinHeapItem(binHeapItem<T> * item) {
 
+            if (item == nullptr)
+                return;
             if (binomialTrees.find(item) != nullptr) {  // is root
                 std::cout << "Is root" << std::endl;    // TODO delete
 
@@ -398,37 +366,19 @@ class CBinomialHeap {
                 binomialTrees.remove(item);
                 treeCount = binomialTrees.size();
 
-
-                size_t i = 0, j = 0;
-                while (i < rootCount() && j < sons.size()) {
-                    if (at(i)->degree < sons.at(j)->degree)
-                        newTrees.insertEnd(at(i++), true);
-                    else
-                        newTrees.insertEnd(sons.at(j++), true);
-                }
- 
-                while (i < rootCount())
-                    newTrees.insertEnd(at(i++), true);
- 
-                while (j < sons.size())
-                    newTrees.insertEnd(sons.at(j++), true);
-
-                
-                binomialTrees.deleteAll(false);
-                treeCount = binomialTrees.size();   //TODO maybe delete
-                
-                sons.deleteAll(false);
-            
-                // Transfering all to the original list
-                for (size_t i = 0; i < newTrees.size(); i++)
-                    binomialTrees.insertEnd(newTrees.next(), true);
-
-                connectEqualDegrees();
-                treeCount = binomialTrees.size();
-
-                newTrees.deleteAll(false);
+                mergeTwoLists(binomialTrees, sons, newTrees);
                 
                             
+            }
+            else {
+                CBinomialHeap tmpHeap;
+                binHeapItem<T> * tmpItem = item;
+                while (tmpItem->parent != nullptr) {
+                    tmpItem = tmpItem->parent;
+                }
+                binomialTrees.remove(tmpItem, false);
+                addOtherInTree(tmpHeap, tmpItem, item);
+                this->merge(tmpHeap);
             }
             if (item == min)
                 findNewMin();
@@ -451,7 +401,8 @@ class CBinomialHeap {
                 if (binomialTrees.size() == 1)
                     return;
                 meldHappened = false;
-                for (unsigned i = 0; i < binomialTrees.size() - 1; i++) {
+                unsigned i = 0;
+                while(i < binomialTrees.size() - 1) {
                     tmpB = binomialTrees.next();
                     if (tmpA->degree == tmpB->degree) {
                         meldHappened = true;
@@ -461,7 +412,7 @@ class CBinomialHeap {
                             binomialTrees.remove(tmpA, false);
                             tmpA->parent = tmpB;
                             tmpB->degree += 1;
-                            tmpA = tmpB;
+                            tmpA = binomialTrees.next();
                         }
                         else {
                             tmpB->leftSibling = tmpA->righestChild;
@@ -470,10 +421,12 @@ class CBinomialHeap {
                             tmpB->parent = tmpA;
                             tmpA->degree += 1;
                             binomialTrees.setIterator(tmpA);
+                            tmpA = binomialTrees.next();
                         }
                     }
                     else
                         tmpA = tmpB;
+                    i++;
                 }
             }
         }
@@ -498,7 +451,7 @@ class CBinomialHeap {
             delete root;
         }
 
-        void findNewMin(void) {
+        binHeapItem<T> * findNewMin(void) {
             binHeapItem<T> * tmpMin = nullptr;
             for (unsigned i = 0; i < binomialTrees.size(); i++) {
                 binHeapItem<T> * tmp = binomialTrees.next();
@@ -507,6 +460,53 @@ class CBinomialHeap {
                 }
             }
             min = tmpMin;
+            return min;
+        }
+
+        void mergeTwoLists(CLinkedList<binHeapItem<T>> & list1, CLinkedList<binHeapItem<T>> & list2, CLinkedList<binHeapItem<T>> & destination) {
+            size_t i = 0, j = 0;
+            while (i < list1.size() && j < list2.size()) {
+                if (list1.at(i)->degree < list2.at(j)->degree)
+                    destination.insertEnd(list1.at(i++), true);
+                else
+                    destination.insertEnd(list2.at(j++), true);
+            }
+ 
+            while (i < list1.size())
+                destination.insertEnd(list1.at(i++), true);
+ 
+            while (j < list2.size())
+                destination.insertEnd(list2.at(j++), true);
+
+                
+            list1.deleteAll(false);
+            treeCount = list1.size();   //TODO maybe delete
+                
+            list2.deleteAll(false);
+            
+            // Transfering all to the original list
+            for (size_t i = 0; i < destination.size(); i++)
+                list1.insertEnd(destination.next(), true);
+
+            connectEqualDegrees();
+            treeCount = list1.size();
+
+            destination.deleteAll(false);
+            findNewMin();
+        }
+
+        void addOtherInTree(CBinomialHeap & tmpHeap, const binHeapItem<T> * tmpItem, const binHeapItem<T> * searchedItem) {
+            if (tmpItem->leftSibling != nullptr)
+                addOtherInTree(tmpHeap, tmpItem->leftSibling, searchedItem);
+            if (tmpItem->righestChild != nullptr)
+                addOtherInTree(tmpHeap, tmpItem->righestChild, searchedItem);
+            
+            if (tmpItem == searchedItem) {
+                delete tmpItem;
+                return;
+            }
+            tmpHeap.addItem(tmpItem->data);
+            delete tmpItem;
         }
 };
 
@@ -517,10 +517,10 @@ int main(void) {
     binHeapItem<int> * tmp;
     a.addItem(5);
     a.addItem(6);
-    a.addItem(7);
-    a.addItem(8);
-    a.addItem(9);
-    a.addItem(10);
+    // a.addItem(7);
+    // a.addItem(8);
+    // a.addItem(9);
+    // a.addItem(10);
     a.addItem(11);
 
     
@@ -531,12 +531,14 @@ int main(void) {
     tmp = b.addItem(2);
     b.addItem(20);
     b.addItem(21);
-    b.addItem(22);
 
     a.merge(b);
     a.printAll();
     std::cout << a.findMin()->data << std::endl;
     a.deleteBinHeapItem(tmp);
     std::cout << a.findMin()->data << std::endl;
+
+
+    a.printAll();
     return 0;
 }
