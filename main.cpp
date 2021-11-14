@@ -353,32 +353,38 @@ class CBinomialHeap {
 
         void connectEqualDegrees() {
             print("Inside connectEqualDegrees()");
-            binomialTrees.resetIterator();
-            binHeapItem<T> * tmpA = binomialTrees.next(), * tmpB;
-            if (binomialTrees.size() == 1)
-                return;
-            for (unsigned i = 0; i < binomialTrees.size(); i++) {
-                tmpB = binomialTrees.next();
-                if (tmpA->degree == tmpB->degree) {
-                    if (tmpA->data >= tmpB->data) {
-                        tmpA->leftSibling = tmpB->righestChild;
-                        tmpB->righestChild = tmpA;
-                        binomialTrees.remove(tmpA, false);
-                        tmpA->parent = tmpB;
-                        tmpB->degree += 1;
+            
+            bool meldHappened = true;
+            while (meldHappened) {
+                binomialTrees.resetIterator();
+                binHeapItem<T> * tmpA = binomialTrees.next(), * tmpB;
+                if (binomialTrees.size() == 1)
+                    return;
+                meldHappened = false;
+                for (unsigned i = 0; i < binomialTrees.size() - 1; i++) {
+                    tmpB = binomialTrees.next();
+                    if (tmpA->degree == tmpB->degree) {
+                        meldHappened = true;
+                        if (tmpA->data >= tmpB->data) {
+                            tmpA->leftSibling = tmpB->righestChild;
+                            tmpB->righestChild = tmpA;
+                            binomialTrees.remove(tmpA, false);
+                            tmpA->parent = tmpB;
+                            tmpB->degree += 1;
+                            tmpA = tmpB;
+                        }
+                        else {
+                            tmpB->leftSibling = tmpA->righestChild;
+                            tmpA->righestChild = tmpB;
+                            binomialTrees.remove(tmpB, false);
+                            tmpB->parent = tmpA;
+                            tmpA->degree += 1;
+                            binomialTrees.setIterator(tmpA);
+                        }
+                    }
+                    else
                         tmpA = tmpB;
-                    }
-                    else {
-                        tmpB->leftSibling = tmpA->righestChild;
-                        tmpA->righestChild = tmpB;
-                        binomialTrees.remove(tmpB, false);
-                        tmpB->parent = tmpA;
-                        tmpA->degree += 1;
-                        binomialTrees.setIterator(tmpA);
-                    }
                 }
-                else
-                    tmpA = tmpB;
             }
         }
 
@@ -411,20 +417,20 @@ int main(void) {
     a.addItem(5);
     a.addItem(6);
     a.addItem(7);
-    // a.addItem(8);
-    // a.addItem(9);
-    // a.addItem(10);
-    // a.addItem(11);
+    a.addItem(8);
+    a.addItem(9);
+    a.addItem(10);
+    a.addItem(11);
 
 
     b.addItem(15);
     b.addItem(16);
     b.addItem(17);
     b.addItem(18);
-    // b.addItem(19);
-    // b.addItem(20);
-    // b.addItem(21);
-    // b.addItem(22);
+    b.addItem(19);
+    b.addItem(20);
+    b.addItem(21);
+    b.addItem(22);
 
     a.merge(b);
     a.printAll();
