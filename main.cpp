@@ -4,11 +4,6 @@
 
 size_t GlobalTime = 0;
 
-void print(const std::string log) {
-    // std::cout << log << std::endl;
-}
-
-
 template<typename T>
 struct linkedListItem {
     linkedListItem * next;
@@ -19,22 +14,16 @@ template<typename T>
 class CLinkedList {
     public:
         ~CLinkedList() {
-            print("CLinkedList destructor init");
-            print(name);
-            if (notToBeFreed) {
-                print("notToBeFreed is true, returning.");
+            if (notToBeFreed)
                 return;
-            }
-            print("notToBeFreed is false, continuing.");
+
             linkedListItem<T> * tmp;
 
             while (this->first != nullptr) {
                 tmp = this->first;
                 this->first = this->first->next;
                 delete tmp->data;
-                print("Deleted linkedListItem Data");
                 delete tmp;
-                print("Deleted linkedListItem");
             }
         }
 
@@ -125,12 +114,10 @@ class CLinkedList {
             while (this->first != nullptr) {
                 tmp = this->first;
                 this->first = this->first->next;
-                if (trigger) {
+                if (trigger) 
                     delete tmp->data;
-                    print("Deleted linkedListItem Data");
-                }
                 delete tmp;
-                print("Deleted linkedListItem");
+
             }
 
             this->first = nullptr;
@@ -241,10 +228,6 @@ class CLinkedList {
             itemCount--;
         }
 
-        void rename(const std::string newName) {    // TODO delete
-            name = newName;
-        }
-
         T * find(T * data) const {
             linkedListItem<T> * tmp = this->first;
 
@@ -264,7 +247,6 @@ class CLinkedList {
         linkedListItem<T> * it = nullptr;
         unsigned itemCount = 0;
         bool notToBeFreed = false;
-        std::string name = "";
 };
 
 
@@ -307,13 +289,7 @@ class CBinomialHeap {
             return tmp;
         }
 
-        void rename(const std::string newName) {
-            binomialTrees.rename(newName);
-        }
-
         void merge(CBinomialHeap & heap) {    // TODO remake it to next()
-            print("Inside merge()");
-            
             CLinkedList<binHeapItem<T>> newTrees;
 
             mergeTwoLists(binomialTrees, heap.binomialTrees, newTrees);
@@ -327,14 +303,6 @@ class CBinomialHeap {
 
         size_t rootCount() const {
             return binomialTrees.size();
-        }
-
-        void printAll() {
-            print("Inside printAll()");
-            for (size_t i = 0; i < rootCount(); i++) {
-                std::cout << "Tree:" << i << std::endl;
-                printTree(binomialTrees.next());
-            }
         }
 
         void deleteAll(const bool trigger) {
@@ -351,8 +319,6 @@ class CBinomialHeap {
             if (item == nullptr)
                 return;
             if (binomialTrees.find(item) != nullptr) {  // is root
-                std::cout << "Is root" << std::endl;    // TODO delete
-
                 CLinkedList<binHeapItem<T>> newTrees;
                 CLinkedList<binHeapItem<T>> sons;
 
@@ -397,8 +363,6 @@ class CBinomialHeap {
         binHeapItem<T> * min = nullptr;
 
         void connectEqualDegrees(void) {
-            print("Inside connectEqualDegrees()");
-            
             bool meldHappened = true;
             while (meldHappened) {
                 binomialTrees.resetIterator();
@@ -434,15 +398,6 @@ class CBinomialHeap {
                     i++;
                 }
             }
-        }
-
-        void printTree(const binHeapItem<T> * root) const {
-            if (root->leftSibling != nullptr)
-                printTree(root->leftSibling);
-            if (root->righestChild != nullptr)
-                printTree(root->righestChild);
-            
-            std::cout << "Degree: " << root->degree << " Data: " << root->data << std::endl;
         }
 
         void destructTree(binHeapItem<T> * root) const {
@@ -514,53 +469,3 @@ class CBinomialHeap {
             delete tmpItem;
         }
 };
-
-int main(void) {
-    CBinomialHeap<int> a, b;
-    a.rename("a binTrees");
-    b.rename("b binTrees");
-    binHeapItem<int> * tmp;
-    a.addItem(5);
-    a.addItem(6);
-    // a.addItem(7);
-    // a.addItem(8);
-    // a.addItem(9);
-    // a.addItem(10);
-    a.addItem(11);
-
-    
-    b.addItem(15);
-    b.addItem(16);
-    b.addItem(17);
-    b.addItem(18);
-    tmp = b.addItem(2);
-    b.addItem(20);
-    b.addItem(21);
-
-    a.merge(b);
-    a.printAll();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteBinHeapItem(tmp);
-    std::cout << a.findMin()->data << std::endl;
-
-
-    a.printAll();
-
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-    std::cout << a.findMin()->data << std::endl;
-    a.deleteMin();
-
-    return 0;
-}
